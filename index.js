@@ -34,16 +34,20 @@ module.exports = function(source) {
     options.sourcemap = { comment: false };
   }
 
-  var styl = stylus(source, options);
-  var paths = [path.dirname(options.filename)];
+  if (options.paths) {
+      if (!Array.isArray(options.paths)) {
+          options.paths = [options.paths];
+      }
+      options.paths.push(path.dirname(options.filename));
+  } else {
+      options.paths = [path.dirname(options.filename)];
+  }
+
+  var styl = stylus(source, options)
+    .define('url', resolver(options));
 
   function needsArray(value) {
     return (Array.isArray(value)) ? value : [value];
-  }
-
-  if (options.paths && !Array.isArray(options.paths)) {
-    paths = paths.concat(options.paths);
-    options.paths = [options.paths];
   }
 
   var manualImports = [];
@@ -67,10 +71,6 @@ module.exports = function(source) {
       });
     } else {
       styl.set(key, value);
-
-      if (key === 'resolve url' && value) {
-        styl.define('url', resolver());
-      }
     }
   });
 
