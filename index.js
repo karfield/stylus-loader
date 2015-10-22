@@ -30,7 +30,6 @@ module.exports = function(source) {
     options.sourcemap = { comment: false };
   }
 
-  var styl = stylus(source, options);
   var paths = [path.dirname(options.filename)];
 
   function needsArray(value) {
@@ -41,6 +40,9 @@ module.exports = function(source) {
     paths = paths.concat(options.paths);
     options.paths = [options.paths];
   }
+
+  var styl = stylus(source, options)
+    .define('url', resolver(options));
 
   var manualImports = [];
   Object.keys(options).forEach(function(key) {
@@ -64,10 +66,6 @@ module.exports = function(source) {
       });
     } else {
       styl.set(key, value);
-
-      if (key === 'resolve url' && value) {
-        styl.define('url', resolver());
-      }
     }
   });
 
